@@ -141,21 +141,9 @@ class _ChatPage extends State<ChatPage> {
                     setState(() {
                       _value = value;
                     });
-                    if (_value == 0) {
-                      _sendMessage('0');
-                    } else if (_value == 30) {
-                      _sendMessage('1');
-                    } else if (_value == 60) {
-                      _sendMessage('2');
-                    } else if (_value == 90) {
-                      _sendMessage('3');
-                    } else if (_value == 120) {
-                      _sendMessage('4');
-                    } else if (_value == 150) {
-                      _sendMessage('5');
-                    } else if (_value == 180) {
-                      _sendMessage('6');
-                    }
+                    int messageValue = (_value / 30).round();
+                    String messageString = messageValue.toString();
+                    _sendMessage(messageString);
                   }
                 },
               ),
@@ -251,28 +239,20 @@ class _ChatPage extends State<ChatPage> {
     }
   }
 
-  void _sendMessage(String text) async {
-    text = text.trim();
-    textEditingController.clear();
-
-    if (text.length > 0) {
+  void _sendMessage(String message) {
+    if (message.isNotEmpty) {
       try {
-        connection.output.add(utf8.encode(text + "\r\n"));
-        await connection.output.allSent;
-
+        connection.output.add(utf8.encode(message + "\r\n"));
         setState(() {
-          messages.add(_Message(clientID, text));
+          messages.add(_Message(clientID, message));
         });
-
-        Future.delayed(Duration(milliseconds: 333)).then((_) {
-          listScrollController.animateTo(
-              listScrollController.position.maxScrollExtent,
-              duration: Duration(milliseconds: 333),
-              curve: Curves.easeOut);
-        });
+        listScrollController.animateTo(
+          listScrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
       } catch (e) {
-        // Ignore error, but notify state
-        setState(() {});
+        print("Error: $e");
       }
     }
   }
